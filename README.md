@@ -10,7 +10,6 @@ This is a simple NodeJS HTTP to allow control of RGB lighting connected to OpenR
 - Install the dependencies
   - Open CMD, and enter the following `cd <your-directory-from-earlier>`
   - Enter the command `npm install openrgb` (https://www.npmjs.com/package/openrgb)
-  - Enter the command `npm install hex-rgb` (https://www.npmjs.com/package/hex-rgb)
 - Make sure that OpenRGB is open, and the SDK Server is running. The port needs to be `6742` and nothing else. Note: the IP setup in the NodeJS server is `localhost` so if you plan to run this server elsewhere, you'd need to change that.
 - Run the NodeJS server
   - Open CMD, and enter the following `cd <your-directory-from-earlier>`
@@ -38,4 +37,3 @@ If there is anything you'd think I can add to make this better, raise and issue 
 ## Notes
 Many thanks to the following:
 vlakreeh for the NodeJS OpenRGB Client (https://www.npmjs.com/~vlakreeh)
-sindresorhus for the helpful conversion module hex-rgb (https://github.com/sindresorhus)
