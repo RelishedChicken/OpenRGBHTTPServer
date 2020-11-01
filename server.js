@@ -50,7 +50,7 @@ async function changeColours (hexcol){
     const client = new OpenRGBClient({
         host: "localhost",
         port: 6742,
-        name: "Homekit"
+        name: "OpenRGB HTTP Server"
     });
 
     await client.connect();
