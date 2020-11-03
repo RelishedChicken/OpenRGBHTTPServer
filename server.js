@@ -4,6 +4,7 @@ const url = require('url');
 
 var hex = '#ffffff';
 var lastHex = '#ffffff';
+var turnedOff = false;
 changeColours(hex);
 
 http.createServer(function (req,res){
@@ -15,27 +16,27 @@ http.createServer(function (req,res){
     var val = query.val;
     
     if(path == "/status"){
-        if(hex!="#000000"){
-            res.write("1");
-        }else{
+        if(hex == "#000000"){
             res.write("0");
+        }else{
+            res.write("1");
         }
     }else if(path == "/set"){
         if(val == null){
             res.write(hex);
         }else{
             hex = val;
-            changeColours(hex);
         }
     }else if(path == "/on"){
-        hex = lastHex;
-        changeColours(hex);
+        turnedOff = false;
     }else if(path == "/off"){
-        if(hex != "#000000"){
-            lastHex = hex;
-            hex = "#000000";
-            changeColours(hex);
-        }
+        turnedOff = true;
+    }
+    
+    if(!turnedOff){
+        changeColours(hex);
+    }else{
+        changeColours("#000000");
     }
         
     res.end();
