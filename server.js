@@ -5,7 +5,6 @@ const url = require('url');
 var hex = '#ffffff';
 var lastHex = '#ffffff';
 var turnedOff = false;
-changeColours(hex);
 
 http.createServer(function (req,res){
     
