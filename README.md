@@ -23,7 +23,7 @@ Command | URL | Info
 On | http://localhost:8080/on | Turns the lighting on to its last used colour before being turned off.
 Off | http://localhost:8080/off | Turns the lighting off.
 Status | http://localhost:8080/status | Returns `0` if lights are off (black) and returns `1` if they are any colour and on (note these are returned in the HTML body.
-Set Colour | http://localhost:8080/set?val=<HEX-COLOUR> | Sets colour of PC lighting with `<HEX-COLOUR>` being any Hexadecimal colour WITHOUT a `#`.
+Set Colour | http://localhost:8080/set?val=[HEX-COLOUR] | Sets colour of PC lighting with `[HEX-COLOUR]` being any Hexadecimal colour WITHOUT a `#`.
 Get Colour | http://localhost:8080/set | Returns the colour as a Hexadecimal (e.g. `#754643`).
   
 ## Smart Home (HomeKit)
