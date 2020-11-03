@@ -41,7 +41,7 @@ http.createServer(function (req,res){
         turnedOff = true;
     }
         
-    var interval = 150;
+    var interval = 100;
     
     var colArray = colourFade(lastHex.replace("#",""),hex.replace("#",""),10);
     
@@ -52,7 +52,12 @@ http.createServer(function (req,res){
             }, interval * i, i);
         }
     }else{
-        changeColours(hex);
+        if(turnedOff){
+            changeColours("#000000");
+        }else{
+            changeColours(hex);
+        }
+        
     }
     
     console.log("Starting at: "+lastHex.replace("#",""));
