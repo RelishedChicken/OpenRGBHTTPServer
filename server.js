@@ -1,8 +1,12 @@
 const { OpenRGBClient } = require('openrgb');
 const http = require('http');
 const url = require('url');
+const colourFade = require('fade-steps');
 
-var hex = '#ffffff';
+///OPTIONS
+var useColourFading = false;
+
+var hex = '#000000';
 var lastHex = '#ffffff';
 var turnedOff = false;
 
@@ -24,19 +28,35 @@ http.createServer(function (req,res){
         if(val == null){
             res.write(hex);
         }else{
+            lastHex = hex;
             hex = val;
         }
     }else if(path == "/on"){
+        hex = lastHex;
+        lastHex = "#000000";
         turnedOff = false;
     }else if(path == "/off"){
+        lastHex = hex;
+        hex = "#000000";
         turnedOff = true;
     }
+        
+    var interval = 150;
     
-    if(!turnedOff){
-        changeColours(hex);
+    var colArray = colourFade(lastHex.replace("#",""),hex.replace("#",""),10);
+    
+    if(useColourFading){
+        for(i=0;i<colArray.length;i++){
+            setTimeout(function(i){
+                changeColours(colArray[i]);
+            }, interval * i, i);
+        }
     }else{
-        changeColours("#000000");
+        changeColours(hex);
     }
+    
+    console.log("Starting at: "+lastHex.replace("#",""));
+    console.log("Ending at: "+hex.replace("#",""));
         
     res.end();
     
@@ -69,7 +89,8 @@ async function changeColours (hexcol){
         await client.updateLeds(deviceId, colors);
     }
 
-    await client.disconnect();
+    
+    return true;
 }
 
 function hexToRgb(hex) {
