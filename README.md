@@ -10,6 +10,7 @@ This is a simple NodeJS HTTP to allow control of RGB lighting connected to OpenR
 - Install the dependencies
   - Open CMD, and enter the following `cd <your-directory-from-earlier>`
   - Enter the command `npm install openrgb` (https://www.npmjs.com/package/openrgb)
+  - Enter the command `npm install fade-steps` (https://www.npmjs.com/package/fade-steps)
 - Make sure that OpenRGB is open, and the SDK Server is running. The port needs to be `6742` and nothing else. Note: the IP setup in the NodeJS server is `localhost` so if you plan to run this server elsewhere, you'd need to change that.
 - Run the NodeJS server
   - Open CMD, and enter the following `cd <your-directory-from-earlier>`
@@ -25,7 +26,10 @@ Off | http://localhost:8080/off | Turns the lighting off.
 Status | http://localhost:8080/status | Returns `0` if lights are off (black) and returns `1` if they are any colour and on (note these are returned in the HTML body.
 Set Colour | http://localhost:8080/set?val=[HEX-COLOUR] | Sets colour of PC lighting with `[HEX-COLOUR]` being any Hexadecimal colour.
 Get Colour | http://localhost:8080/set | Returns the colour as a Hexadecimal (e.g. `#754643`).
-  
+
+## Extra Settings
+If you'd like to have a fading animation between colour changes and turning lights on and off, change the boolean `useColourFading` to `true`. This will enable it. Note: this is a very basic implementation of it and therefore may be buggy with slower devices.
+
 ## Smart Home (HomeKit)
 To do this, I used HomeBridge and a plugin for it called homebridge-better-http-rgb (https://www.npmjs.com/package/homebridge-better-http-rgb). It allows you to configure a HomeKit accessory that uses HTTP calls to turn RGB lighting on, off and change thier colour. If you need any help with this the before-mentioned link should help.
 
@@ -37,3 +41,4 @@ If there is anything you'd think I can add to make this better, raise and issue 
 ## Notes
 Many thanks to the following:
 vlakreeh for the NodeJS OpenRGB Client (https://www.npmjs.com/~vlakreeh)
+bencevans for the colour fading library (https://www.npmjs.com/~bencevans)
