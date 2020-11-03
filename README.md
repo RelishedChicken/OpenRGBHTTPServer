@@ -40,5 +40,5 @@ If there is anything you'd think I can add to make this better, raise and issue 
 
 ## Notes
 Many thanks to the following:
-vlakreeh for the NodeJS OpenRGB Client (https://www.npmjs.com/~vlakreeh)
-bencevans for the colour fading library (https://www.npmjs.com/~bencevans)
+- vlakreeh for the NodeJS OpenRGB Client (https://www.npmjs.com/~vlakreeh)
+- bencevans for the colour fading library (https://www.npmjs.com/~bencevans)
