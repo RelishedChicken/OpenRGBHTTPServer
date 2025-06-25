@@ -1,108 +1,114 @@
-const { OpenRGBClient } = require('openrgb');
+const { Client } = require('openrgb-sdk');
 const http = require('http');
 const url = require('url');
-const colourFade = require('fade-steps');
+const axios = require('axios');
+const { start } = require('repl');
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-///OPTIONS
-var useColourFading = false;
+var status = {
+    "currentState": 1,
+    "currentColor": "#FFFFFF",
+    "forceOff": false,
+    "special": false,
+    "specialMode": ""
+}
 
-var hex = '#000000';
-var lastHex = '#ffffff';
-var turnedOff = false;
+startHTTPServer();
 
-http.createServer(function (req,res){
-    
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    
-    var query = url.parse(req.url, true).query;
-    var path = url.parse(req.url, true).pathname;
-    var val = query.val;
-    
-    if(path == "/status"){
-        if(hex == "#000000"){
-            res.write("0");
-        }else{
-            res.write("1");
+async function startHTTPServer(){
+
+    //Run the server
+    http.createServer(function(req,res){
+
+        res.writeHead(200, {'Content-Type': 'application/json'});
+            
+        var query = url.parse(req.url, true).query;
+        var path = url.parse(req.url, true).pathname;
+        var val = query.value;
+        var hasChanged = false;
+
+        switch(path){
+            case "/status":
+                res.write(JSON.stringify(status));
+                break;
+            case "/setState":
+                status.special = false;
+                status.forceOff = true;
+                status.currentState = (val==="true" ? 1 : 0);
+                hasChanged = true;
+                break;
+            case "/setColor":
+                status.special = false;
+                status.currentColor = "#"+val;
+                hasChanged = true;
+                break;
+            case "/setSpecial":
+                status.special = true;
+                status.specialMode = val;
+                hasChanged = true;
+                break;
+            case "/statusSwitch":
+                if(status.special && status.specialMode == val){
+                    res.write("1");
+                }else{
+                    res.write("0");
+                }
+                hasChanged = true;
+                break;
         }
-    }else if(path == "/set"){
-        if(val == null){
-            res.write(hex);
-        }else{
-            lastHex = hex;
-            hex = val;
+
+        if(hasChanged){
+            update(status);
         }
-    }else if(path == "/on"){
-        hex = lastHex;
-        lastHex = "#000000";
-        turnedOff = false;
-    }else if(path == "/off"){
-        lastHex = hex;
-        hex = "#000000";
-        turnedOff = true;
-    }
         
-    var interval = 100;
-    
-    var colArray = colourFade(lastHex.replace("#",""),hex.replace("#",""),10);
-    
-    if(useColourFading){
-        for(i=0;i<colArray.length;i++){
-            setTimeout(function(i){
-                changeColours(colArray[i]);
-            }, interval * i, i);
-        }
-    }else{
-        if(turnedOff){
-            changeColours("#000000");
-        }else{
-            changeColours(hex);
-        }
-        
-    }
-    
-    console.log("Starting at: "+lastHex.replace("#",""));
-    console.log("Ending at: "+hex.replace("#",""));
-        
-    res.end();
-    
-}).listen(8080);
+        res.end();
 
-async function changeColours (hexcol){
-    
-    var rgb = hexToRgb(hexcol);
-    
-    console.log(rgb);
-    
-    const client = new OpenRGBClient({
-        host: "localhost",
-        port: 6742,
-        name: "Open RGB HTTP Server"
-    });
 
+    }).listen(56789);
+
+}
+
+
+async function update (status){                 
+
+    const client = new Client("OpenRGB HTTP Server", 6742, "localhost", {forceProtocolVersion: 4});
+
+    //Connect to OpenRGB
     await client.connect();
+
     const controllerCount = await client.getControllerCount();
 
-    for (let deviceId = 0; deviceId < controllerCount; deviceId++) {
-        var device = await client.getDeviceController(deviceId);
-        
-        var colors = Array(device.colors.length).fill({
-            red: rgb.r,
-            green: rgb.g,
-            blue: rgb.b
-        });
-        
-        await client.updateLeds(deviceId, colors);
+    var newCol;
+
+    //Get the colour to set
+    if(status.currentState == 0 ){
+        newCol = hexToRgb("#000000");
+    }else{
+        newCol = hexToRgb(status.currentColor);
     }
 
-    
-    return true;
+    var devices = await client.getAllControllerData();   
+        
+    devices.forEach(async device => {
+        const colours = Array(device.colors.length).fill({
+            red: newCol.r,
+            green: newCol.g,
+            blue: newCol.b
+        });      
+
+        await client.updateLeds(device.deviceId,colours);
+    });
+
+    //Disconnect from OpenRGB
+    await client.disconnect();    
+
 }
 
 function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
