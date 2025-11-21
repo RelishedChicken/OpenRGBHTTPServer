@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "axios": "^0.26.1",
-    "openrgb-sdk": "file:../../../../GIT/openrgb-sdk"
+    "openrgb-sdk": "file:../openrgb-sdk"
   }
 }

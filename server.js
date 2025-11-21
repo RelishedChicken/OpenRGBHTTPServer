@@ -57,9 +57,9 @@ async function startHTTPServer(){
                 break;
         }
 
-        if(hasChanged){
+        //if(hasChanged){
             update(status);
-        }
+        //}
         
         res.end();
 
@@ -69,14 +69,25 @@ async function startHTTPServer(){
 }
 
 
-async function update (status){                 
+async function update (status){
 
     const client = new Client("OpenRGB HTTP Server", 6742, "localhost", {forceProtocolVersion: 4});
+
+    // Handle socket errors gracefully
+    client.on('error', (err) => {
+        if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
+            console.log("Connection closed by OpenRGB (this is normal)");
+        } else {
+            console.error(`Client error: ${err.message}`);
+        }
+    });
 
     //Connect to OpenRGB
     await client.connect();
 
     const controllerCount = await client.getControllerCount();
+
+    console.log(controllerCount);
 
     var newCol;
 
@@ -87,20 +98,44 @@ async function update (status){
         newCol = hexToRgb(status.currentColor);
     }
 
-    var devices = await client.getAllControllerData();   
-        
-    devices.forEach(async device => {
-        const colours = Array(device.colors.length).fill({
-            red: newCol.r,
-            green: newCol.g,
-            blue: newCol.b
-        });      
+    var devices = await client.getAllControllerData();
 
-        await client.updateLeds(device.deviceId,colours);
-    });
+    // Update each device sequentially to avoid connection issues
+    for (const device of devices) {
+        try {
+            // Find the Direct/Custom mode
+            const directMode = device.modes.find(m =>
+                m.name.toLowerCase().includes('direct') ||
+                m.name.toLowerCase().includes('custom')
+            );
+
+            // Only change mode if not already in direct mode
+            if (directMode && device.activeMode !== directMode.id) {
+                await client.updateMode(device.deviceId, { id: directMode.id });
+                await delay(150); // Wait for mode change to take effect
+            }
+
+            const colours = Array(device.colors.length).fill({
+                red: newCol.r,
+                green: newCol.g,
+                blue: newCol.b
+            });
+
+            await client.updateLeds(device.deviceId, colours);
+        } catch (error) {
+            console.log(`Failed to update device ${device.name}: ${error.message}`);
+        }
+    }
+
+    // Wait a moment before disconnecting to ensure all updates are processed
+    await delay(100);
 
     //Disconnect from OpenRGB
-    await client.disconnect();    
+    try {
+        await client.disconnect();
+    } catch (error) {
+        // Connection may already be closed by OpenRGB, ignore the error
+    }    
 
 }
 
