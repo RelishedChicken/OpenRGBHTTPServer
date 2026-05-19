@@ -8,7 +8,6 @@ This is a simple NodeJS HTTP to allow control of RGB lighting connected to OpenR
 - Clone the repo
 - `npm install` within cloned repo
 - `node server.js` or `node test.js` to test your connection
-- I am currently working on my own redo of the forever deprecated Node SDK of OpenRGB. So you will want to uninstall my directly pathed version and use `openrgb-sdk` instead which is what my new one is a fork of but unfinished...
 
 ## Usage
 
