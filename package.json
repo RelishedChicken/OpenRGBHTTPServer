@@ -2,5 +2,8 @@
   "dependencies": {
     "axios": "^0.26.1",
     "openrgb-sdk": "^0.6.0"
+  },
+  "scripts": {
+    "postinstall": "node patches/fix-openrgb-sdk.js"
   }
 }
